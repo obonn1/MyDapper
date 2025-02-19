@@ -7,8 +7,8 @@ namespace MyDapper.Tests;
 [TestFixture]
 public class SimpleDapperTests
 {
-    private DbConnection? connection;
-    private SimpleDapper? simpleDapper;
+    private DbConnection connection;
+    private SimpleDapper simpleDapper;
 
     public static readonly string ConnectionString = new SqlConnectionStringBuilder
     {
@@ -38,10 +38,10 @@ public class SimpleDapperTests
     {
         const string dropTestTableSql = "if object_id('TestTable') is not null drop table TestTable;";
 
-        await simpleDapper!.ExecuteAsync(dropTestTableSql);
+        await simpleDapper.ExecuteAsync(dropTestTableSql);
 
-        await connection!.CloseAsync();
-        connection.Dispose();
+        await connection.CloseAsync();
+        await connection.DisposeAsync();
     }
 
     [Test]
