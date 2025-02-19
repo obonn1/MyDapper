@@ -1,5 +1,6 @@
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Shouldly;
 
 namespace MyDapper.Tests;
@@ -7,16 +8,19 @@ namespace MyDapper.Tests;
 [TestFixture]
 public class SimpleDapperTests
 {
-    private DbConnection connection;
-    private SimpleDapper simpleDapper;
+    private DbConnection connection = null!;
+    private SimpleDapper simpleDapper = null!;
+    private static string ConnectionString => GetConnectionString();
 
-    public static readonly string ConnectionString = new SqlConnectionStringBuilder
+    private static string GetConnectionString()
     {
-        DataSource = "(local)",
-        InitialCatalog = "MyDapperTest",
-        IntegratedSecurity = true,
-        TrustServerCertificate = true
-    }.ToString();
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        return configuration.GetConnectionString("MyDapperTest") ?? throw new ShouldAssertException("Connection string not found in appsettings.json"); ;
+    }
 
     [SetUp]
     public async Task Setup()
@@ -50,7 +54,7 @@ public class SimpleDapperTests
         const string insertSql = "insert into TestTable (Id, Name) values (1, 'Test')";
 
         // Act
-        var affectedRows = await simpleDapper!.ExecuteAsync(insertSql);
+        var affectedRows = await simpleDapper.ExecuteAsync(insertSql);
 
         // Assert
         affectedRows.ShouldBe(1);
