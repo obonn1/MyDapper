@@ -37,7 +37,6 @@ public class SimpleDapperTests
     public async Task TearDown()
     {
         const string dropTestTableSql = "if object_id('TestTable') is not null drop table TestTable;";
-
         await simpleDapper.ExecuteAsync(dropTestTableSql);
 
         await connection.CloseAsync();
