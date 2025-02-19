@@ -22,6 +22,7 @@ public class SimpleDapperTests
     public async Task Setup()
     {
         connection = new SqlConnection(ConnectionString);
+        simpleDapper = new SimpleDapper(connection);
 
         const string createTestTableSql =
             """
@@ -29,13 +30,7 @@ public class SimpleDapperTests
             create table TestTable (Id int primary key, Name nvarchar(50));
             """;
 
-        await using var command = connection.CreateCommand();
-        command.CommandText = createTestTableSql;
-        await connection.OpenAsync();
-
-        await command.ExecuteNonQueryAsync();
-
-        simpleDapper = new SimpleDapper(connection);
+        await simpleDapper.ExecuteAsync(createTestTableSql);
     }
 
     [TearDown]
@@ -43,9 +38,7 @@ public class SimpleDapperTests
     {
         const string dropTestTableSql = "if object_id('TestTable') is not null drop table TestTable;";
 
-        await using var command = connection!.CreateCommand();
-        command.CommandText = dropTestTableSql;
-        await command.ExecuteNonQueryAsync();
+        await simpleDapper!.ExecuteAsync(dropTestTableSql);
 
         await connection!.CloseAsync();
         connection.Dispose();
